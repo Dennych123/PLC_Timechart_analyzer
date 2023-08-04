@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<!-- saved from url=(0054)https://leeoniya.github.io/uPlot/demos/line-paths.html -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		
+		<title>Line Paths</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+
+		<link rel="stylesheet" href="./stepped_files/uPlot.min.css">
+		<style>
+			body {
+				margin: 0;
+				background: #141619;
+				color: #c7d0d9;
+			}
+
+			.uplot {
+				margin-top: 30px;
+			}
+
+			.u-select {
+				background: rgba(255,255,255,0.07);
+			}
+		</style>
+	</head>
+	<body>
+		<script src="./stepped_files/uPlot.iife.js.download"></script>
+		<script>
+	  	
+
+
+
+
+
+	function findNearestNonNullIndex(arr, val) {
+    let minDist = Infinity;
+    let nearestIndex = null;
+	for (let i = 0; i < arr.length; i++) {
+        if (arr[i] !== null) {
+            const dist = Math.abs(arr[i] - val);
+            if (dist < minDist) {
+                minDist = dist;
+                nearestIndex = i;
+            }
+        }
+    }
+	return nearestIndex;
+}
+	function datumsPlugin() 	{
+			let x1;
+			let x2;
+			let y1;
+			let y2;
+			const drawDatum = (u, x, y, color) => {
+    // Snap the X-axis marker to the nearest X data point
+    const xIdx = findNearestNonNullIndex(data[0], x);
+    if (xIdx !== null) {
+        x = data[0][xIdx];
+    }
+
+    let cx = u.valToPos(x, "x", true);
+    let cy = u.valToPos(y, "y", true);
+    let rad = 10;	
+
+    u.ctx.strokeStyle = color;
+    u.ctx.beginPath();
+
+    //u.ctx.arc(cx, cy, rad, 0, 2 * Math.PI);
+
+    u.ctx.moveTo(cx - rad - 5, cy);
+    u.ctx.lineTo(cx + rad + 5, cy);
+    u.ctx.moveTo(cx, cy - rad - 5);
+    u.ctx.lineTo(cx, cy + rad + 5);
+
+    u.ctx.stroke();
+};
+
+			const clearDatums = (u) => {
+				x1 = x2 = y1 = y2 = null;
+				u.redraw();
+			};
+
+			const drawDelta = (u) => {
+    		if (x1 != null && x2 != null) {
+        	// Find the nearest non-null data points
+       		 const [xIdx1, xIdx2] = [findNearestNonNullIndex(data[0], x1), findNearestNonNullIndex(data[0], x2)];
+
+       		 if (xIdx1 !== null && xIdx2 !== null) {
+            const nearestX1 = data[0][xIdx1];
+            const nearestX2 = data[0][xIdx2];
+            const nearestY1 = data[1][xIdx1];
+            const nearestY2 = data[1][xIdx2];
+
+            // Calculate the delta between the nearest non-null points
+            let dxLabel = (nearestX2 - nearestX1).toPrecision(3);
+			let dyLabel = (y2 - y1).toPrecision(3);
+            let xPos = u.valToPos((nearestX1 + nearestX2) / 2, "x", true);
+            let yPos = u.valToPos((y1 + y2) / 2, "y", true);
+            u.ctx.textAlign = "center";
+            u.ctx.textBaseline = "middle";
+            u.ctx.fillStyle = "white";
+            u.ctx.fillText(`dx: ${dxLabel}, dy: ${dyLabel}`, xPos, yPos);
+        }
+    }
+};
+
+
+			
+
+			return {
+				hooks: {
+					init: (u) => {
+						u.over.tabIndex = -1; // required for key handlers
+						u.over.style.outlineWidth = "0"; // prevents yellow input box outline when in focus
+
+						u.over.addEventListener("wheel", (e) => {
+							clearDatums(u);
+						});
+
+						u.over.addEventListener("dblclick", (e) => {
+							clearDatums(u);
+						});
+
+						u.over.addEventListener(
+							"keydown",
+							(e) => {
+								if (e.key == "Escape") {
+									clearDatums(u);
+								} else {
+									const { left, top } = u.cursor;
+
+									if (left >= 0 && top >= 0) {
+										if (e.key == "1") {
+											x1 = u.posToVal(left, "x");
+											y1 = u.posToVal(top, "y");
+											u.redraw();
+										} else if (e.key == "2") {
+											x2 = u.posToVal(left, "x");
+											y2 = u.posToVal(top, "y");
+											u.redraw();
+										}
+									}
+								}
+							},
+							true
+						);
+					},
+					draw: (u) => {
+						if (x1 != null || x2 != null) {
+							u.ctx.save();
+
+							u.ctx.lineWidth = 2;
+
+							if (x1 != null) {
+								drawDatum(u, x1, y1, "blue");
+							}
+
+							if (x2 != null) {
+								drawDatum(u, x2, y2, "orange");
+								drawDelta(u);
+							}
+
+							u.ctx.restore();
+						}
+					},
+				},
+			};
+		}
+
+			
+			const { linear, stepped, bars, spline, spline2 } = uPlot.paths;
+
+			let data = [
+				[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100],
+				[0,1,0,1,1,1,1,0,1,0,1,1,0,1,1,0,1,1,0,0,1,0,1,1,1,1,0,1,0,0,1,1,1,0,1,0,1,0,1,0,0,0,0,1,0,1,1,1,0,0,1,0,0,1,1,0,0,0,1,0,0,1,0,0,1,1,1,1,1,0,0,0,1,1,1,1,1,0,1,0,1,1,0,1,1,0,0,1,0,0,1,1,1,0,1,1,0,1,0,0,0],
+				[1,1,0,1,1,1,0,0,0,0,1,1,1,0,1,0,1,1,0,1,1,0,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1,1,1,0,1,1,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,1,0,1,1,0,0,0,0,0,0,0,1,1,1,0,1,0,1,1,0,0,0,1,1,0,1,0,0,0,1,1,0,1,0,1,1,0,1,1,0],
+				[1,0,1,0,0,0,1,1,1,1,0,1,0,1,1,0,0,1,1,0,1,0,1,0,1,1,0,1,0,1,0,1,0,0,0,1,1,0,0,1,1,0,1,1,1,1,1,0,0,0,0,1,0,1,0,1,0,1,0,0,1,0,1,1,1,1,1,1,1,1,1,0,0,1,0,1,0,1,0,1,0,1,1,0,0,0,1,1,1,0,1,1,1,0,0,1,1,0,0,0,0],
+				[0,1,0,1,1,1,1,0,1,0,1,1,0,1,1,0,1,1,0,0,1,0,1,1,1,1,0,1,0,0,1,1,1,0,1,0,1,0,1,0,0,0,0,1,0,1,1,1,0,0,1,0,0,1,1,0,0,0,1,0,0,1,0,0,1,1,1,1,1,0,0,0,1,1,1,1,1,0,1,0,1,1,0,1,1,0,0,1,0,0,1,1,1,0,1,1,0,1,0,0,0],
+				[1,0,1,0,0,0,1,1,1,1,0,1,0,1,1,0,0,1,1,0,1,0,1,0,1,1,0,1,0,1,0,1,0,0,0,1,1,0,0,1,1,0,1,1,1,1,1,0,0,0,0,1,0,1,0,1,0,1,0,0,1,0,1,1,1,1,1,1,1,1,1,0,0,1,0,1,0,1,0,1,0,1,1,0,0,0,1,1,1,0,1,1,1,0,0,1,1,0,0,0,0],
+			];
+
+			//data[1].splice(22, 4, null, null, null, null);
+
+			const lineInterpolations = {
+				linear:     0,
+				stepAfter:  1,
+				stepBefore: 2,
+				spline:     3,
+			//	spline2:    4,
+			};
+
+			const drawStyles = {
+				line:      0,
+				bars:      1,
+				points:    2,
+				barsLeft:  3,
+				barsRight: 4,
+			};
+
+			// generate bar builder with 60% bar (40% gap) & 100px max bar width
+			const _bars60_100   = bars({size: [0.6, 100]});
+			const _bars100Left  = bars({size: [1], align:  1});
+			const _bars100Right = bars({size: [1], align: -1});
+			const _stepBefore   = stepped({align: -1}); //, ascDesc: true
+			const _stepAfter    = stepped({align:  1}); //, ascDesc: true
+			const _linear       = linear();
+			const _spline       = spline();
+		//	const _spline2      = spline2();
+
+			function paths(u, seriesIdx, idx0, idx1, extendGap, buildClip) {
+				let s = u.series[seriesIdx];
+				let style = s.drawStyle;
+				let interp = s.lineInterpolation;
+
+				let renderer = (
+					style == drawStyles.line ? (
+						interp == lineInterpolations.linear     ? _linear :
+						interp == lineInterpolations.stepAfter  ? _stepAfter :
+						interp == lineInterpolations.stepBefore ? _stepBefore :
+						interp == lineInterpolations.spline     ? _spline :
+					//	interp == lineInterpolations.spline2    ? _spline2 :
+						null
+					) :
+					style == drawStyles.bars ? (
+						_bars60_100
+					) :
+					style == drawStyles.barsLeft ? (
+						_bars100Left
+					) :
+					style == drawStyles.barsRight ? (
+						_bars100Right
+					) :
+					style == drawStyles.points ? (
+						 null
+					) : () => null
+				);
+
+				return renderer(u, seriesIdx, idx0, idx1, extendGap, buildClip);
+			}
+
+			const palette = [
+				'#7EB26D', // 0: pale green
+				'#EAB839', // 1: mustard
+				'#6ED0E0', // 2: light blue
+				'#EF843C', // 3: orange
+				'#E24D42', // 4: red
+				'#1F78C1', // 5: ocean
+				'#BA43A9', // 6: purple
+				'#705DA0', // 7: violet
+				'#508642', // 8: dark green
+				'#CCA300', // 9: dark sand
+			];
+
+			let cfgs = [];
+
+			for (let i = 1; i < data.length; i++) {
+				cfgs.push({
+					title: `Time-Chart Measuring Tool ${i}`,
+					drawStyle: drawStyles.line,
+					lineInterpolation: lineInterpolations.stepAfter,
+					stroke: palette[i % palette.length],
+				});
+			}
+			
+			function makeChart(cfg) {
+				let opts = {
+					width: 1700,
+					height: 300,
+					plugins: [datumsPlugin()],
+					title: cfg.title,
+					cursor: {
+						points: {
+							size:   (u, seriesIdx)       => u.series[seriesIdx].points.size * 2.5,
+							width:  (u, seriesIdx, size) => size / 4,
+							stroke: (u, seriesIdx)       => u.series[seriesIdx].points.stroke(u, seriesIdx) + '90',
+							fill:   (u, seriesIdx)       => "#fff",
+						},
+						sync: {
+							key: 0,
+						}
+					},
+					scales: {
+						x: {
+							time: false,
+						//	range: [-10,110],
+						//	dir: -1,
+						},
+					},
+					axes: [
+						{
+							stroke: "#c7d0d9",
+						//	font: `12px 'Roboto'`,
+						//	labelFont: `12px 'Roboto'`,
+							grid: {
+								width: 1 / devicePixelRatio,
+								stroke: "#2c3235",
+							},
+							ticks: {
+								width: 1 / devicePixelRatio,
+								stroke: "#2c3235",
+							}
+						},
+						{
+							stroke: "#c7d0d9",
+						//	font: `12px 'Roboto'`,
+						//	labelFont: `12px 'Roboto'`,
+							grid: {
+								width: 1 / devicePixelRatio,
+								stroke: "#2c3235",
+							},
+							ticks: {
+								width: 1 / devicePixelRatio,
+								stroke: "#2c3235",
+							}
+						},
+					],
+					series: [
+						{
+							label: "X",
+						},
+						Object.assign({
+							label: "Y",
+							width: 1 / devicePixelRatio,
+							drawStyle: drawStyles.points,
+							lineInterpolation: null,
+							paths,
+						}, {
+							drawStyle:         cfg.drawStyle,
+							lineInterpolation: cfg.lineInterpolation,
+							stroke:            cfg.stroke,
+							fill:              cfg.stroke + "1A",
+						}),
+					],
+				};
+
+				 return new uPlot(opts, [data[0], data[cfgs.indexOf(cfg) + 1]], document.body);
+			}
+			 
+			cfgs.forEach(cfg => {
+				makeChart(cfg);
+			});
+		</script>
+	
+
+</body></html>
