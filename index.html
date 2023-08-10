@@ -25,7 +25,39 @@
 	<body>
 		<script src="./stepped_files/uPlot.iife.js"></script>
 		<script>
-	  	
+
+	async function loadDataFromCSV() {
+    const response = await fetch("./stepped_files/20230619090240_00003.csv"); // Update with your CSV file's path
+    const csvData = await response.text();
+    console.log('CSV data fetched:', csvData);
+
+    const lines = csvData.trim().split('\n');
+
+    // Find the index of the line that starts with "Index,"
+    const startIndex = lines.findIndex(line => line.startsWith("Index,"));
+
+    // Assuming the first row (line 0) contains headers
+    const headers = lines[startIndex].split(',');
+
+    const columnIndexMap = new Map();
+    headers.forEach((header, index) => columnIndexMap.set(header, index));
+
+    // Initialize data arrays
+    const data = [];
+    for (let i = 1; i < headers.length; i++) {
+        data.push([]);
+    }
+
+    for (let i = startIndex + 1; i < lines.length; i++) {
+        const columns = lines[i].split(',');
+        for (let j = 1; j < columns.length; j++) {
+            data[j - 1].push(Number(columns[j]));
+        }
+    }
+
+    console.log('Data processed:', data);
+    return data;
+}  	
 
 
 
@@ -334,7 +366,7 @@
 
 				 return new uPlot(opts, [data[0], data[cfgs.indexOf(cfg) + 1]], document.body);
 			}
-			 
+			loadDataFromCSV(); 
 			cfgs.forEach(cfg => {
 				makeChart(cfg);
 			});
