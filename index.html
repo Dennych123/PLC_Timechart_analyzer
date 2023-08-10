@@ -49,7 +49,7 @@ async function loadDataFromCSV() {
 
     for (let i = startIndex + 1; i < lines.length; i++) {
         const columns = lines[i].split(',');
-        const dataIndex = columnIndexMap.get("Index,");
+        const dataIndex = columnIndexMap.get("Index");
         const programA1Index = columnIndexMap.get("Program0.a1:BOOL");
         const programA2Index = columnIndexMap.get("Program0.a2:BOOL");
 
