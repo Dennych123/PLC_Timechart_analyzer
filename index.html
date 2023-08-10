@@ -26,10 +26,10 @@
 		<script src="./stepped_files/uPlot.iife.js"></script>
 		<script>
 
-	async function loadDataFromCSV() {
+async function loadDataFromCSV() {
     const response = await fetch("./stepped_files/20230725213055_00001.csv"); // Update with your CSV file's path
     const csvData = await response.text();
-    console.log('CSV data fetched:', csvData);
+    //console.log('CSV data fetched:', csvData);
 
     const lines = csvData.trim().split('\n');
 
@@ -42,22 +42,32 @@
     const columnIndexMap = new Map();
     headers.forEach((header, index) => columnIndexMap.set(header, index));
 
-    // Initialize data arrays
-    const data = [];
-    for (let i = 1; i < headers.length; i++) {
-        data.push([]);
-    }
+    // Initialize data arrays for the desired columns
+    const indexData = [];
+    const programA1Data = [];
+    const programA2Data = [];
 
     for (let i = startIndex + 1; i < lines.length; i++) {
         const columns = lines[i].split(',');
-        for (let j = 1; j < columns.length; j++) {
-            data[j - 1].push(Number(columns[j]));
-        }
+        const dataIndex = columnIndexMap.get("Index,");
+        const programA1Index = columnIndexMap.get("Program0.a1:BOOL");
+        const programA2Index = columnIndexMap.get("Program0.a2:BOOL");
+
+        indexData.push(Number(columns[dataIndex]));
+        programA1Data.push(Number(columns[programA1Index]));
+        programA2Data.push(Number(columns[programA2Index]));
     }
 
-    console.log('Data processed:', data);
-    return data;
-}  	
+    const extractedData = {
+        index: indexData,
+        programA1: programA1Data,
+        programA2: programA2Data,
+    };
+
+    console.log('Extracted Data:', extractedData);
+    return extractedData;
+}
+
 
 
 
