@@ -43,32 +43,29 @@ async function loadDataFromCSV() {
     headers.forEach((header, index) => columnIndexMap.set(header, index));
 
     // Initialize data arrays for the desired columns
-    const indexData = [];
-    const programA1Data = [];
-    const programA2Data = [];
+    const extractedData = {};
+
+    headers.forEach((header, index) => {
+        if (header !== "Index" && header !== "Date" && header !== "ClockTime" && header !== "RawTime" && header !== "TraceSampID") {
+            extractedData[header] = [];
+        }
+    });
 
     for (let i = startIndex + 1; i < lines.length; i++) {
         const columns = lines[i].split(',');
-        const dataIndex = columnIndexMap.get("Index");
-        const programA1Index = columnIndexMap.get("Program0.a1:BOOL");
-        const programA2Index = columnIndexMap.get("Program0.a2:BOOL");
 
-        indexData.push(Number(columns[dataIndex]));
-        programA1Data.push(Number(columns[programA1Index]));
-        programA2Data.push(Number(columns[programA2Index]));
+        headers.forEach((header, index) => {
+            if (header !== "Index" && header !== "Date" && header !== "ClockTime" && header !== "RawTime" && header !== "TraceSampID") {
+                const columnIndex = columnIndexMap.get(header);
+                const value = columns[columnIndex].trim(); // Trim whitespace
+                extractedData[header].push(value !== '' ? Number(value) : null);
+            }
+        });
     }
-
-    const extractedData = {
-        index: indexData,
-        programA1: programA1Data,
-        programA2: programA2Data,
-    };
 
     console.log('Extracted Data:', extractedData);
     return extractedData;
 }
-
-
 
 
 
