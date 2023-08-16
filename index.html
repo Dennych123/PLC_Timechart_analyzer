@@ -25,6 +25,37 @@
 	<body>
 		<script src="./stepped_files/uPlot.iife.js"></script>
 		<script>
+ 			let firstArray;
+			 let secArray;
+			 
+
+	async function main() {
+    await loadDataFromCSV();
+
+	firstArray = extractedData[Object.keys(extractedData)[0]];
+	secArray = extractedData[Object.keys(extractedData)[1]];
+	console.log('extracted data:',extractedData);
+    //console.log('First Array:', firstArray);
+	data = [
+        firstArray, // Assign the populated firstArray
+        secArray,   // Assign the populated secArray
+    ];
+
+   
+    cfgs.forEach(cfg => {
+        makeChart(cfg);
+    });
+	console.log('data:', data);
+}
+let data = [
+    [], // Placeholder for firstArray
+    [], // Placeholder for secArray
+];
+
+let extractedData = {};
+console.log('data:', data);
+
+ 
 
 async function loadDataFromCSV() {
     const response = await fetch("./stepped_files/20230725213055_00001.csv"); // Update with your CSV file's path
@@ -43,10 +74,10 @@ async function loadDataFromCSV() {
     headers.forEach((header, index) => columnIndexMap.set(header, index));
 
     // Initialize data arrays for the desired columns
-    const extractedData = {};
+    
 
     headers.forEach((header, index) => {
-        if (header !== "Index" && header !== "Date" && header !== "ClockTime" && header !== "RawTime" && header !== "TraceSampID") {
+        if ( header !== "Date" && header !== "ClockTime" && header !== "RawTime" && header !== "TraceSampID") {
             extractedData[header] = [];
         }
     });
@@ -55,7 +86,7 @@ async function loadDataFromCSV() {
         const columns = lines[i].split(',');
 
         headers.forEach((header, index) => {
-            if (header !== "Index" && header !== "Date" && header !== "ClockTime" && header !== "RawTime" && header !== "TraceSampID") {
+            if (  header !== "Date" && header !== "ClockTime" && header !== "RawTime" && header !== "TraceSampID") {
                 const columnIndex = columnIndexMap.get(header);
                 const value = columns[columnIndex].trim(); // Trim whitespace
                 extractedData[header].push(value !== '' ? Number(value) : null);
@@ -63,10 +94,9 @@ async function loadDataFromCSV() {
         });
     }
 
-    console.log('Extracted Data:', extractedData);
+	
     return extractedData;
 }
-
 
 
 
@@ -84,11 +114,12 @@ async function loadDataFromCSV() {
     }
 	return nearestIndex;
 }
-	function datumsPlugin() 	{
-			let x1;
-			let x2;
-			let y1;
-			let y2;
+function datumsPlugin() {
+    let x1;
+    let x2;
+    let y1;
+    let y2;
+    let clearOnScroll = false;
 			const drawDatum = (u, x, y, color) => {
     // Snap the X-axis marker to the nearest X data point
     const xIdx = findNearestNonNullIndex(data[0], x);
@@ -151,14 +182,19 @@ async function loadDataFromCSV() {
 						u.over.tabIndex = -1; // required for key handlers
 						u.over.style.outlineWidth = "0"; // prevents yellow input box outline when in focus
 
+						/* u.over.addEventListener("wheel", (e) => {
+							clearDatums(u);
+						}); */
+
+						/* u.over.addEventListener("dblclick", (e) => {
+							clearDatums(u);
+						}); */
+						
 						u.over.addEventListener("wheel", (e) => {
-							clearDatums(u);
-						});
-
-						u.over.addEventListener("dblclick", (e) => {
-							clearDatums(u);
-						});
-
+                    // Do not clear datums on mouse scroll
+                    e.preventDefault();
+                    e.stopPropagation();
+               		 });
 						u.over.addEventListener(
 							"keydown",
 							(e) => {
@@ -208,14 +244,7 @@ async function loadDataFromCSV() {
 			
 			const { linear, stepped, bars, spline, spline2 } = uPlot.paths;
 
-			let data = [
-				[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45,46,47,48,49,50,51,52,53,54,55,56,57,58,59,60,61,62,63,64,65,66,67,68,69,70,71,72,73,74,75,76,77,78,79,80,81,82,83,84,85,86,87,88,89,90,91,92,93,94,95,96,97,98,99,100],
-				[0,1,0,1,1,1,1,0,1,0,1,1,0,1,1,0,1,1,0,0,1,0,1,1,1,1,0,1,0,0,1,1,1,0,1,0,1,0,1,0,0,0,0,1,0,1,1,1,0,0,1,0,0,1,1,0,0,0,1,0,0,1,0,0,1,1,1,1,1,0,0,0,1,1,1,1,1,0,1,0,1,1,0,1,1,0,0,1,0,0,1,1,1,0,1,1,0,1,0,0,0],
-				[1,1,0,1,1,1,0,0,0,0,1,1,1,0,1,0,1,1,0,1,1,0,0,0,1,0,1,1,0,0,1,1,0,1,0,0,1,1,1,0,1,1,0,1,1,1,0,0,0,0,1,1,1,0,0,0,0,0,1,1,1,1,0,1,1,0,0,0,0,0,0,0,1,1,1,0,1,0,1,1,0,0,0,1,1,0,1,0,0,0,1,1,0,1,0,1,1,0,1,1,0],
-				[1,0,1,0,0,0,1,1,1,1,0,1,0,1,1,0,0,1,1,0,1,0,1,0,1,1,0,1,0,1,0,1,0,0,0,1,1,0,0,1,1,0,1,1,1,1,1,0,0,0,0,1,0,1,0,1,0,1,0,0,1,0,1,1,1,1,1,1,1,1,1,0,0,1,0,1,0,1,0,1,0,1,1,0,0,0,1,1,1,0,1,1,1,0,0,1,1,0,0,0,0],
-				[0,1,0,1,1,1,1,0,1,0,1,1,0,1,1,0,1,1,0,0,1,0,1,1,1,1,0,1,0,0,1,1,1,0,1,0,1,0,1,0,0,0,0,1,0,1,1,1,0,0,1,0,0,1,1,0,0,0,1,0,0,1,0,0,1,1,1,1,1,0,0,0,1,1,1,1,1,0,1,0,1,1,0,1,1,0,0,1,0,0,1,1,1,0,1,1,0,1,0,0,0],
-				[1,0,1,0,0,0,1,1,1,1,0,1,0,1,1,0,0,1,1,0,1,0,1,0,1,1,0,1,0,1,0,1,0,0,0,1,1,0,0,1,1,0,1,1,1,1,1,0,0,0,0,1,0,1,0,1,0,1,0,0,1,0,1,1,1,1,1,1,1,1,1,0,0,1,0,1,0,1,0,1,0,1,1,0,0,0,1,1,1,0,1,1,1,0,0,1,1,0,0,0,0],
-			];
+			
 
 			//data[1].splice(22, 4, null, null, null, null);
 
@@ -373,10 +402,10 @@ async function loadDataFromCSV() {
 
 				 return new uPlot(opts, [data[0], data[cfgs.indexOf(cfg) + 1]], document.body);
 			}
-			loadDataFromCSV(); 
-			cfgs.forEach(cfg => {
-				makeChart(cfg);
-			});
+
+			
+
+		main();
 		</script>
 	
 
