@@ -2,7 +2,7 @@
 <!-- saved from url=(0054)https://leeoniya.github.io/uPlot/demos/line-paths.html -->
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 		
-		<title>Line Paths</title>
+		<title>Time-Chart Measuring Tool</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 
 		<link rel="stylesheet" href="./stepped_files/uPlot.min.css">
@@ -36,13 +36,14 @@
     await loadDataFromCSV();
 
 	for (let i = 1; i < data.length; i++) {
-				cfgs.push({
-					title: `Time-Chart Measuring Tool ${i}`,
-					drawStyle: drawStyles.line,
-					lineInterpolation: lineInterpolations.stepAfter,
-					stroke: palette[i % palette.length],
-				});
-			}
+        const header = Object.keys(extractedData)[i ]; // Get the header dynamically
+        cfgs.push({
+            title: header, // Use the header as the title
+            drawStyle: drawStyles.line,
+            lineInterpolation: lineInterpolations.stepAfter,
+            stroke: palette[i % palette.length],
+        });
+    }
 	
    
     cfgs.forEach(cfg => {
