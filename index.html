@@ -28,32 +28,34 @@
  			let firstArray;
 			 let secArray;
 			 
+	let data = [];
+	let extractedData = {};		
+	let cfgs = [];
 
 	async function main() {
     await loadDataFromCSV();
 
-	firstArray = extractedData[Object.keys(extractedData)[0]];
-	secArray = extractedData[Object.keys(extractedData)[1]];
-	console.log('extracted data:',extractedData);
-    //console.log('First Array:', firstArray);
-	data = [
-        firstArray, // Assign the populated firstArray
-        secArray,   // Assign the populated secArray
-    ];
-
+	for (let i = 1; i < data.length; i++) {
+				cfgs.push({
+					title: `Time-Chart Measuring Tool ${i}`,
+					drawStyle: drawStyles.line,
+					lineInterpolation: lineInterpolations.stepAfter,
+					stroke: palette[i % palette.length],
+				});
+			}
+	
    
     cfgs.forEach(cfg => {
         makeChart(cfg);
     });
-	console.log('data:', data);
+	
 }
-let data = [
-    [], // Placeholder for firstArray
-    [], // Placeholder for secArray
-];
 
-let extractedData = {};
-console.log('data:', data);
+
+console.log('data:', data); //line a
+console.log('extracteddata:', extractedData);
+
+
 
  
 
@@ -93,14 +95,16 @@ async function loadDataFromCSV() {
             }
         });
     }
-
+	const dataArray = Object.keys(extractedData).map(key => extractedData[key]);
+	console.log('dataarray:', dataArray);
+    data = dataArray;
 	
     return extractedData;
 }
 
 
 
-	function findNearestNonNullIndex(arr, val) {
+function findNearestNonNullIndex(arr, val) {
     let minDist = Infinity;
     let nearestIndex = null;
 	for (let i = 0; i < arr.length; i++) {
@@ -318,16 +322,9 @@ function datumsPlugin() {
 				'#CCA300', // 9: dark sand
 			];
 
-			let cfgs = [];
+			
 
-			for (let i = 1; i < data.length; i++) {
-				cfgs.push({
-					title: `Time-Chart Measuring Tool ${i}`,
-					drawStyle: drawStyles.line,
-					lineInterpolation: lineInterpolations.stepAfter,
-					stroke: palette[i % palette.length],
-				});
-			}
+			
 			
 			function makeChart(cfg) {
 				let opts = {
