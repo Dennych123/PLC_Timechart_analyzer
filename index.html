@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- saved from url=(0054)https://leeoniya.github.io/uPlot/demos/line-paths.html -->
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-		
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 		<title>Time-Chart Measuring Tool</title>
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -20,14 +20,49 @@
 			.u-select {
 				background: rgba(255,255,255,0.07);
 			}
+			/* Pop-up note styles */
+			.popup-note {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 1000;
+        }
 		</style>
 	</head>
 	<body>
+		<!-- Note in the top-left corner -->
+		<div class="popup-note" id="popupNote">
+			<p>#Upload Sysmac studio trace file (.csv)</p>
+			<p>#Click the chart press "1" on the keyboard to draw first point to measure</p>
+			<p>#Press "2" for second point</p>
+			<p>#"Esc" to clear measuring point</p>
+			<p>#Block the chart for zoom in</p>
+			<p>#Double click to zoom out</p>
+			<button onclick="closePopup()">Got it!</button>
+		</div>
+	
 		<input type="file" id="fileInput" accept=".csv">
 		<script src="./stepped_files/uPlot.iife.js"></script>
 		<script>
- 			let firstArray;
-			 let secArray;
+			 // Show the pop-up note when the page is loaded
+			 window.onload = function() {
+            const popupNote = document.getElementById('popupNote');
+            popupNote.style.display = 'block';
+        };
+
+        // Close the pop-up note
+        function closePopup() {
+            const popupNote = document.getElementById('popupNote');
+            popupNote.style.display = 'none';
+        }
+ 			
 			 
 	let data = [];
 	let extractedData = {};		
