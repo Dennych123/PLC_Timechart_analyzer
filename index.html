@@ -23,6 +23,7 @@
 		</style>
 	</head>
 	<body>
+		<input type="file" id="fileInput" accept=".csv">
 		<script src="./stepped_files/uPlot.iife.js"></script>
 		<script>
  			let firstArray;
@@ -31,41 +32,14 @@
 	let data = [];
 	let extractedData = {};		
 	let cfgs = [];
-
-	async function main() {
-    await loadDataFromCSV();
-
-	for (let i = 1; i < data.length; i++) {
-        const header = Object.keys(extractedData)[i ]; // Get the header dynamically
-        cfgs.push({
-            title: header, // Use the header as the title
-            drawStyle: drawStyles.line,
-            lineInterpolation: lineInterpolations.stepAfter,
-            stroke: palette[i % palette.length],
-        });
-    }
+	let csvData={};
 	
-   
-    cfgs.forEach(cfg => {
-        makeChart(cfg);
-    });
-	
-}
+	async function handleFileUpload(file) {
+            try {
+                const csvData = await readFileContents(file);
+                console.log("File contents:", csvData);
 
-
-console.log('data:', data); //line a
-console.log('extracteddata:', extractedData);
-
-
-
- 
-
-async function loadDataFromCSV() {
-    const response = await fetch("./stepped_files/20230725213055_00001.csv"); // Update with your CSV file's path
-    const csvData = await response.text();
-    //console.log('CSV data fetched:', csvData);
-
-    const lines = csvData.trim().split('\n');
+                const lines = csvData.trim().split('\n');
 
     // Find the index of the line that starts with "Index,"
     const startIndex = lines.findIndex(line => line.startsWith("Index,"));
@@ -101,8 +75,86 @@ async function loadDataFromCSV() {
     data = dataArray;
 	
     return extractedData;
+
+                cfgs.forEach(cfg => {
+                    makeChart(cfg);
+                });
+            } catch (error) {
+                console.error("Error reading file:", error);
+            }
+        }
+
+        function readFileContents(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    resolve(event.target.result);
+                };
+                reader.onerror = (event) => {
+                    reject(event.error);
+                };
+                reader.readAsText(file);
+            });
+        }
+
+        const fileInput = document.getElementById("fileInput");
+		fileInput.addEventListener("change", async (event) => {
+    const selectedFile = event.target.files[0];
+    if (selectedFile) {
+        await handleFileUpload(selectedFile);
+
+        console.log('data:', data); // Now data should be populated
+
+        for (let i = 1; i < data.length; i++) {
+            const header = Object.keys(extractedData)[i]; // Get the header dynamically
+            cfgs.push({
+                title: header, // Use the header as the title
+                drawStyle: drawStyles.line,
+                lineInterpolation: lineInterpolations.stepAfter,
+                stroke: palette[i % palette.length],
+            });
+        }
+
+        cfgs.forEach(cfg => {
+            makeChart(cfg);
+        });
+    }
+});
+	async function main() {
+	await handleFileUpload;
+	console.log('data:', data); 	
+	for (let i = 1; i < data.length; i++) {
+        const header = Object.keys(extractedData)[i ]; // Get the header dynamically
+        cfgs.push({
+            title: header, // Use the header as the title
+            drawStyle: drawStyles.line,
+            lineInterpolation: lineInterpolations.stepAfter,
+            stroke: palette[i % palette.length],
+        });
+    }
+	
+    cfgs.forEach(cfg => {
+        makeChart(cfg);
+    });
+	
 }
 
+
+console.log('data:', data); //line a
+console.log('extracteddata:', extractedData);
+
+
+
+ 
+
+/* async function loadDataFromCSV() {
+    //const response = await fetch("./stepped_files/20230725213055_00001.csv"); // Update with your CSV file's path
+    //const csvData = await response.text();
+    //console.log('CSV data fetched:', csvData);
+
+    
+}
+ */
 
 
 function findNearestNonNullIndex(arr, val) {
