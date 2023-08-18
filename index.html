@@ -435,6 +435,14 @@ function datumsPlugin() {
 			
 			
 			function makeChart(cfg) {
+				let isStepAfter = true; // Default to stepAfter interpolation
+
+    // Check if data contains only 0 or 1
+    if (data[cfgs.indexOf(cfg) + 1].every(value => value === 0 || value === 1)) {
+        isStepAfter = true; // Use stepAfter for binary data
+    } else {
+        isStepAfter = false; // Use linear for other data types
+    }
     let opts = {
         width: 1400,
         height: 150,
@@ -494,6 +502,23 @@ function datumsPlugin() {
             }, {
                 drawStyle:         cfg.drawStyle,
                 lineInterpolation: cfg.lineInterpolation,
+                stroke:            cfg.stroke,
+                fill:              cfg.stroke + "1A",
+            }),
+        ],
+		series: [
+            {
+                label: "X",
+            },
+            Object.assign({
+                label: "Y",
+                width: 1 / devicePixelRatio,
+                drawStyle: drawStyles.points,
+                lineInterpolation: null,
+                paths,
+            }, {
+                drawStyle:         cfg.drawStyle,
+                lineInterpolation: isStepAfter ? lineInterpolations.stepAfter : lineInterpolations.linear,
                 stroke:            cfg.stroke,
                 fill:              cfg.stroke + "1A",
             }),
