@@ -33,6 +33,15 @@
 	let extractedData = {};		
 	let cfgs = [];
 	let csvData={};
+
+	function clearChartAndData() {
+    document.querySelectorAll(".chart-container").forEach(chartContainer => {
+        chartContainer.remove();
+    });
+    cfgs = [];
+    data = [];
+    extractedData = {};
+}
 	
 	async function handleFileUpload(file) {
             try {
@@ -101,6 +110,9 @@
 		fileInput.addEventListener("change", async (event) => {
     const selectedFile = event.target.files[0];
     if (selectedFile) {
+        // Clear existing charts and configurations
+        clearChartAndData();
+        
         await handleFileUpload(selectedFile);
 
         console.log('data:', data); // Now data should be populated
@@ -120,11 +132,20 @@
         });
     }
 });
-	async function main() {
-	await handleFileUpload;
-	console.log('data:', data); 	
-	for (let i = 1; i < data.length; i++) {
-        const header = Object.keys(extractedData)[i ]; // Get the header dynamically
+
+
+async function main() {
+    console.log('data:', data); // Should show the uploaded data
+
+    // Clear existing charts and configurations
+    document.querySelectorAll(".chart-container").forEach(chartContainer => {
+        chartContainer.remove();
+    });
+    cfgs = [];
+	data = [];
+
+    for (let i = 1; i < data.length; i++) {
+        const header = Object.keys(extractedData)[i]; // Get the header dynamically
         cfgs.push({
             title: header, // Use the header as the title
             drawStyle: drawStyles.line,
@@ -132,11 +153,10 @@
             stroke: palette[i % palette.length],
         });
     }
-	
+
     cfgs.forEach(cfg => {
         makeChart(cfg);
     });
-	
 }
 
 
