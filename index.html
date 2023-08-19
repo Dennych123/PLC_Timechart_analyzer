@@ -40,7 +40,7 @@
 		<!-- Note in the top-left corner -->
 		<div class="popup-note" id="popupNote">
 			<p>#Upload Sysmac studio trace file (.csv)</p>
-			<p>#Click the chart press "1" on the keyboard to draw first point to measure</p>
+			<p>#Click the chart,press "1" on the keyboard to draw first point to measure</p>
 			<p>#Press "2" for second point</p>
 			<p>#"Esc" to clear measuring point</p>
 			<p>#Block the chart for zoom in</p>
@@ -68,6 +68,7 @@
 	let extractedData = {};		
 	let cfgs = [];
 	let csvData={};
+	let samplingInterval;
 
 	function clearChartAndData() {
     document.querySelectorAll(".chart-container").forEach(chartContainer => {
@@ -81,7 +82,7 @@
 	async function handleFileUpload(file) {
             try {
                 const csvData = await readFileContents(file);
-                console.log("File contents:", csvData);
+               // console.log("File contents:", csvData);
 
                 const lines = csvData.trim().split('\n');
 
@@ -91,6 +92,11 @@
     // Assuming the first row (line 0) contains headers
     const headers = lines[startIndex].split(',');
 
+	// Find the index of the line that starts with "SamplingInterval,"
+	const intervalLine = lines.find(line => line.startsWith("SamplingInterval,"));
+    samplingInterval = intervalLine.split(',')[1]; // Get the SamplingInterval value
+	console.log("sample interval :", samplingInterval);
+		
     const columnIndexMap = new Map();
     headers.forEach((header, index) => columnIndexMap.set(header, index));
 
@@ -115,19 +121,21 @@
         });
     }
 	const dataArray = Object.keys(extractedData).map(key => extractedData[key]);
-	console.log('dataarray:', dataArray);
+	//console.log('dataarray:', dataArray);
     data = dataArray;
 	
     return extractedData;
 
                 cfgs.forEach(cfg => {
-                    makeChart(cfg);
+                    makeChart(cfg,samplingInterval);
                 });
+				main(samplingInterval);
             } catch (error) {
                 console.error("Error reading file:", error);
             }
+			
         }
-
+		console.log("sample interval :", samplingInterval);
         function readFileContents(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -150,7 +158,7 @@
         
         await handleFileUpload(selectedFile);
 
-        console.log('data:', data); // Now data should be populated
+       // console.log('data:', data); // Now data should be populated
 
         for (let i = 1; i < data.length; i++) {
             const header = Object.keys(extractedData)[i]; // Get the header dynamically
@@ -169,9 +177,10 @@
 });
 
 
-async function main() {
-    console.log('data:', data); // Should show the uploaded data
-
+async function main(samplingInterval) {
+	console.log("sample interval :", samplingInterval);
+   // console.log('data:', data); // Should show the uploaded data
+	console.log("sample interval :", samplingInterval);
     // Clear existing charts and configurations
     document.querySelectorAll(".chart-container").forEach(chartContainer => {
         chartContainer.remove();
@@ -195,8 +204,8 @@ async function main() {
 }
 
 
-console.log('data:', data); //line a
-console.log('extracteddata:', extractedData);
+//console.log('data:', data); //line a
+//console.log('extracteddata:', extractedData);
 
 
 
@@ -226,7 +235,8 @@ function findNearestNonNullIndex(arr, val) {
     }
 	return nearestIndex;
 }
-function datumsPlugin() {
+function datumsPlugin(samplingInterval) {
+	console.log("sample interval :", samplingInterval);
     let x1;
     let x2;
     let y1;
@@ -260,13 +270,14 @@ function datumsPlugin() {
 				x1 = x2 = y1 = y2 = null;
 				u.redraw();
 			};
+			
+			function drawDelta(u, samplingInterval, left, top) {
+			console.log("sample interval :", samplingInterval);
+    if (x1 != null && x2 != null) {
+        // Find the nearest non-null data points
+        const [xIdx1, xIdx2] = [findNearestNonNullIndex(data[0], x1), findNearestNonNullIndex(data[0], x2)];
 
-			const drawDelta = (u) => {
-    		if (x1 != null && x2 != null) {
-        	// Find the nearest non-null data points
-       		 const [xIdx1, xIdx2] = [findNearestNonNullIndex(data[0], x1), findNearestNonNullIndex(data[0], x2)];
-
-       		 if (xIdx1 !== null && xIdx2 !== null) {
+        if (xIdx1 !== null && xIdx2 !== null) {
             const nearestX1 = data[0][xIdx1];
             const nearestX2 = data[0][xIdx2];
             const nearestY1 = data[1][xIdx1];
@@ -274,13 +285,18 @@ function datumsPlugin() {
 
             // Calculate the delta between the nearest non-null points
             let dxLabel = (nearestX2 - nearestX1).toPrecision(3);
-			let dyLabel = (y2 - y1).toPrecision(3);
+            let dyLabel = (y2 - y1).toPrecision(3);
+            
+            // Calculate the duration using the SamplingInterval
+			console.log("sample interval :", samplingInterval);
+           let duration = (xIdx2 - xIdx1) * samplingInterval;
+            
             let xPos = u.valToPos((nearestX1 + nearestX2) / 2, "x", true);
             let yPos = u.valToPos((y1 + y2) / 2, "y", true);
             u.ctx.textAlign = "center";
             u.ctx.textBaseline = "middle";
             u.ctx.fillStyle = "white";
-            u.ctx.fillText(`dx: ${dxLabel}, dy: ${dyLabel}`, xPos, yPos);
+            u.ctx.fillText(`dx: ${dxLabel}, dy: ${dyLabel}, Duration: ${duration.toFixed(2)} ms`, xPos, yPos);
         }
     }
 };
@@ -302,11 +318,11 @@ function datumsPlugin() {
 							clearDatums(u);
 						}); */
 						
-						u.over.addEventListener("wheel", (e) => {
+					/* 	u.over.addEventListener("wheel", (e) => {
                     // Do not clear datums on mouse scroll
                     e.preventDefault();
                     e.stopPropagation();
-               		 });
+               		 }); */
 						u.over.addEventListener(
 							"keydown",
 							(e) => {
@@ -343,7 +359,7 @@ function datumsPlugin() {
 
 							if (x2 != null) {
 								drawDatum(u, x2, y2, "orange");
-								drawDelta(u);
+								drawDelta(u, samplingInterval, u.cursor.left, u.cursor.top);
 							}
 
 							u.ctx.restore();
@@ -353,7 +369,6 @@ function datumsPlugin() {
 			};
 		}
 
-			
 			const { linear, stepped, bars, spline, spline2 } = uPlot.paths;
 
 			
@@ -435,6 +450,7 @@ function datumsPlugin() {
 			
 			
 			function makeChart(cfg) {
+				console.log("sample interval :", samplingInterval);	
 				let isStepAfter = true; // Default to stepAfter interpolation
 
     // Check if data contains only 0 or 1
@@ -446,7 +462,7 @@ function datumsPlugin() {
     let opts = {
         width: 1400,
         height: 150,
-        plugins: [datumsPlugin()],
+        plugins: [datumsPlugin(samplingInterval)],
         title: cfg.title,
        // titlePos: { x: 1, y: 1 }, // Place the title at the bottom-left corner
         cursor: {
@@ -529,9 +545,16 @@ function datumsPlugin() {
     chartContainer.classList.add("chart-container");
     document.body.appendChild(chartContainer);
 
-    return new uPlot(opts, [data[0], data[cfgs.indexOf(cfg) + 1]], chartContainer);
+    return new uPlot(opts, [data[0], data[cfgs.indexOf(cfg) + 1]], chartContainer, {
+        hooks: {
+            draw: (u, ...args) => {
+				console.log("sample interval :", samplingInterval);
+				drawDelta(u, samplingInterval, u.cursor.left, u.cursor.top);
+            },
+            // ... other hooks
+        },
+    });
 }
-
 
 			
 
