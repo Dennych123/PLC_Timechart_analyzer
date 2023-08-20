@@ -47,7 +47,8 @@
 			<p>#Double click to zoom out</p>
 			<button onclick="closePopup()">Got it!</button>
 		</div>
-	
+        <button id="loadSampleButton">Load Sample CSV</button>
+
 		<input type="file" id="fileInput" accept=".csv">
 		<script src="./stepped_files/uPlot.iife.js"></script>
 		<script>
@@ -69,6 +70,45 @@
 	let cfgs = [];
 	let csvData={};
 	let samplingInterval;
+
+    // Add an event listener for the Load Sample button
+const loadSampleButton = document.getElementById("loadSampleButton");
+loadSampleButton.addEventListener("click", async () => {
+    try {
+        // Fetch the sample CSV file from the specified directory
+        const response = await fetch("./stepped_files/20230725213055_00001.csv");
+        const csvData = await response.text();
+        
+        // Create a Blob from the fetched data
+        const blob = new Blob([csvData], { type: "text/csv" });
+        
+        // Create a File object from the Blob
+        const file = new File([blob], "sample.csv", { type: "text/csv" });
+        
+        // Clear existing charts and configurations
+        clearChartAndData();
+        
+        // Handle the loaded sample file
+        await handleFileUpload(file);
+
+        for (let i = 1; i < data.length; i++) {
+            const header = Object.keys(extractedData)[i]; // Get the header dynamically
+            cfgs.push({
+                title: header, // Use the header as the title
+                drawStyle: drawStyles.line,
+                lineInterpolation: lineInterpolations.stepAfter,
+                stroke: palette[i % palette.length],
+            });
+        }
+
+        cfgs.forEach(cfg => {
+            makeChart(cfg);
+        });
+    } catch (error) {
+        console.error("Error loading sample file:", error);
+    }
+});
+
 
 	function clearChartAndData() {
     document.querySelectorAll(".chart-container").forEach(chartContainer => {
