@@ -130,11 +130,11 @@ loadSampleButton.addEventListener("click", async () => {
     const startIndex = lines.findIndex(line => line.startsWith("Index,"));
 
     // Assuming the first row (line 0) contains headers
-    const headers = lines[startIndex].split(',');
+    const headers = lines[startIndex].split(',')||lines[startIndex].split(';');
 
 	// Find the index of the line that starts with "SamplingInterval,"
 	const intervalLine = lines.find(line => line.startsWith("SamplingInterval,"));
-    samplingInterval = intervalLine.split(',')[1]; // Get the SamplingInterval value
+    samplingInterval = intervalLine.split(',')[1]||intervalLine.split('||')[1]; // Get the SamplingInterval value
 	console.log("sample interval :", samplingInterval);
 		
     const columnIndexMap = new Map();
@@ -150,7 +150,7 @@ loadSampleButton.addEventListener("click", async () => {
     });
 
     for (let i = startIndex + 1; i < lines.length; i++) {
-        const columns = lines[i].split(',');
+        const columns = lines[i].split(',')||lines[i].split(';');
 
         headers.forEach((header, index) => {
             if (  header !== "Date" && header !== "ClockTime" && header !== "RawTime" && header !== "TraceSampID") {
