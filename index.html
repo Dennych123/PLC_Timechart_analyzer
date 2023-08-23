@@ -122,9 +122,16 @@ loadSampleButton.addEventListener("click", async () => {
 	async function handleFileUpload(file) {
             try {
                 const csvData = await readFileContents(file);
-               // console.log("File contents:", csvData);
+                console.log("File contents:", csvData);
+        const firstLine = csvData.trim().split('\n')[0];
+        const separator = firstLine.includes(',') ? ',' : ';';
+        console.log("Detected separator:", separator);
 
-                const lines = csvData.trim().split('\n');
+
+        // Preprocess the CSV data if semicolon is the separator
+        const preprocessedCsvData = separator === ';' ? csvData.replace(/;/g, ',') : csvData;
+
+        const lines = preprocessedCsvData.trim().split('\n');
 
     // Find the index of the line that starts with "Index,"
     const startIndex = lines.findIndex(line => line.startsWith("Index,"));
@@ -135,7 +142,7 @@ loadSampleButton.addEventListener("click", async () => {
 	// Find the index of the line that starts with "SamplingInterval,"
 	const intervalLine = lines.find(line => line.startsWith("SamplingInterval,"));
     samplingInterval = intervalLine.split(',')[1]; // Get the SamplingInterval value
-	console.log("sample interval :", samplingInterval);
+	//console.log("sample interval :", samplingInterval);
 		
     const columnIndexMap = new Map();
     headers.forEach((header, index) => columnIndexMap.set(header, index));
@@ -175,7 +182,7 @@ loadSampleButton.addEventListener("click", async () => {
             }
 			
         }
-		console.log("sample interval :", samplingInterval);
+		//console.log("sample interval :", samplingInterval);
         function readFileContents(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
@@ -218,9 +225,9 @@ loadSampleButton.addEventListener("click", async () => {
 
 
 async function main(samplingInterval) {
-	console.log("sample interval :", samplingInterval);
+	//console.log("sample interval :", samplingInterval);
    // console.log('data:', data); // Should show the uploaded data
-	console.log("sample interval :", samplingInterval);
+	//console.log("sample interval :", samplingInterval);
     // Clear existing charts and configurations
     document.querySelectorAll(".chart-container").forEach(chartContainer => {
         chartContainer.remove();
@@ -276,7 +283,7 @@ function findNearestNonNullIndex(arr, val) {
 	return nearestIndex;
 }
 function datumsPlugin(samplingInterval) {
-	console.log("sample interval :", samplingInterval);
+	//console.log("sample interval :", samplingInterval);
     let x1;
     let x2;
     let y1;
@@ -312,7 +319,7 @@ function datumsPlugin(samplingInterval) {
 			};
 			
 			function drawDelta(u, samplingInterval, left, top) {
-			console.log("sample interval :", samplingInterval);
+			//console.log("sample interval :", samplingInterval);
     if (x1 != null && x2 != null) {
         // Find the nearest non-null data points
         const [xIdx1, xIdx2] = [findNearestNonNullIndex(data[0], x1), findNearestNonNullIndex(data[0], x2)];
@@ -328,7 +335,7 @@ function datumsPlugin(samplingInterval) {
             let dyLabel = (y2 - y1).toPrecision(3);
             
             // Calculate the duration using the SamplingInterval
-			console.log("sample interval :", samplingInterval);
+			//console.log("sample interval :", samplingInterval);
            let duration = (xIdx2 - xIdx1) * samplingInterval;
             
             let xPos = u.valToPos((nearestX1 + nearestX2) / 2, "x", true);
@@ -490,7 +497,7 @@ function datumsPlugin(samplingInterval) {
 			
 			
 			function makeChart(cfg) {
-				console.log("sample interval :", samplingInterval);	
+				//console.log("sample interval :", samplingInterval);	
 				let isStepAfter = true; // Default to stepAfter interpolation
 
     // Check if data contains only 0 or 1
