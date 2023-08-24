@@ -121,8 +121,9 @@ loadSampleButton.addEventListener("click", async () => {
 	
 	async function handleFileUpload(file) {
             try {
-                const csvData = await readFileContents(file);
-                console.log("File contents:", csvData);
+
+        const csvData = await readFileContents(file);
+        console.log("File contents:", csvData);
         const firstLine = csvData.trim().split('\n')[0];
         const separator = firstLine.includes(',') ? ',' : ';';
         console.log("Detected separator:", separator);
@@ -130,7 +131,7 @@ loadSampleButton.addEventListener("click", async () => {
 
         // Preprocess the CSV data if semicolon is the separator
         const preprocessedCsvData = separator === ';' ? csvData.replace(/;/g, ',') : csvData;
-              preprocessedCsvData = replace(/"/g, '') : csvData;
+             
         
 
         const lines = preprocessedCsvData.trim().split('\n');
