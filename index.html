@@ -130,7 +130,7 @@ loadSampleButton.addEventListener("click", async () => {
 
         // Preprocess the CSV data if semicolon is the separator
         const preprocessedCsvData = separator === ';' ? csvData.replace(/;/g, ',') : csvData;
-         preprocessedCsvData = separator === ',' ? csvData.replace(/"/g, '') : csvData;
+              preprocessedCsvData = replace(/"/g, '') : csvData;
         
 
         const lines = preprocessedCsvData.trim().split('\n');
