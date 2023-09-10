@@ -63,12 +63,8 @@
             const popupNote = document.getElementById('popupNote');
             popupNote.style.display = 'none';
         }
- 	//add funtion to measuru on horizontal line in chart
-    function addMeasureLine(){
-        var x=document.getElementsByClassName("u-cursor")[0].getAttribute("data-x");
-        var y=document.getElementsByClassName("u-cursor")[0].getAttribute("data-y")*36+8;
-        console.log(`x:${x},y:${y}`);
-    		 
+ 			
+			 
 	let data = [];
 	let extractedData = {};		
 	let cfgs = [];
@@ -125,8 +121,9 @@ loadSampleButton.addEventListener("click", async () => {
 	
 	async function handleFileUpload(file) {
             try {
-                const csvData = await readFileContents(file);
-                console.log("File contents:", csvData);
+
+        const csvData = await readFileContents(file);
+        console.log("File contents:", csvData);
         const firstLine = csvData.trim().split('\n')[0];
         const separator = firstLine.includes(',') ? ',' : ';';
         console.log("Detected separator:", separator);
@@ -134,7 +131,7 @@ loadSampleButton.addEventListener("click", async () => {
 
         // Preprocess the CSV data if semicolon is the separator
         const preprocessedCsvData = separator === ';' ? csvData.replace(/;/g, ',') : csvData;
-         preprocessedCsvData = separator === ',' ? csvData.replace(/"/g, '') : csvData;
+             
         
 
         const lines = preprocessedCsvData.trim().split('\n');
@@ -257,21 +254,6 @@ async function main(samplingInterval) {
 }
 
 
-//console.log('data:', data); //line a
-//console.log('extracteddata:', extractedData);
-
-
-
- 
-
-/* async function loadDataFromCSV() {
-    //const response = await fetch("./stepped_files/20230725213055_00001.csv"); // Update with your CSV file's path
-    //const csvData = await response.text();
-    //console.log('CSV data fetched:', csvData);
-
-    
-}
- */
 
 
 function findNearestNonNullIndex(arr, val) {
@@ -349,7 +331,7 @@ function datumsPlugin(samplingInterval) {
             u.ctx.textAlign = "center";
             u.ctx.textBaseline = "middle";
             u.ctx.fillStyle = "white";
-            u.ctx.fillText(`dx: ${dxLabel},  Time: ${duration.toFixed(2)} ms`, xPos, yPos);
+            u.ctx.fillText(`dx: ${dxLabel}, dy: ${dyLabel}, Duration: ${duration.toFixed(2)} ms`, xPos, yPos);
         }
     }
 };
@@ -376,42 +358,29 @@ function datumsPlugin(samplingInterval) {
                     e.preventDefault();
                     e.stopPropagation();
                		 }); */
-						u.over.addEventListener("keydown", (e) => {
-    if (e.key == "Escape") {
-        clearDatums(u);
-    } else {
-        const { left, top } = u.cursor;
-//add function when shift key pressed to add measuring points
+						u.over.addEventListener(
+							"keydown",
+							(e) => {
+								if (e.key == "Escape") {
+									clearDatums(u);
+								} else {
+									const { left, top } = u.cursor;
 
-        if (left >= 0 && top >= 0) {
-            if (e.shiftKey) {
-                if (e.key == "1") {
-                    // Create a new measuring point 1
-                    x1 = u.posToVal(left, "x");
-                    y1 = u.posToVal(top, "y");
-                    u.redraw();
-                } else if (e.key == "2") {
-                    // Create a new measuring point 2
-                    x2 = u.posToVal(left, "x");
-                    y2 = u.posToVal(top, "y");
-                    u.redraw();
-                }
-            } else {
-                if (e.key == "1") {
-                    // Measure between existing point 1 and the current cursor position
-                    x2 = u.posToVal(left, "x");
-                    y2 = u.posToVal(top, "y");
-                    u.redraw();
-                } else if (e.key == "2") {
-                    // Measure between existing point 2 and the current cursor position
-                    x1 = u.posToVal(left, "x");
-                    y1 = u.posToVal(top, "y");
-                    u.redraw();
-                }
-            }
-        }
-    }
-}, true);
+									if (left >= 0 && top >= 0) {
+										if (e.key == "1") {
+											x1 = u.posToVal(left, "x");
+											y1 = u.posToVal(top, "y");
+											u.redraw();
+										} else if (e.key == "2") {
+											x2 = u.posToVal(left, "x");
+											y2 = u.posToVal(top, "y");
+											u.redraw();
+										}
+									}
+								}
+							},
+							true
+						);
 					},
 					draw: (u) => {
 						if (x1 != null || x2 != null) {
